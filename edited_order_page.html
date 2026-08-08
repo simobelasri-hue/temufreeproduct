@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Confirm your order</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F8F8F8;
+    --card:#FFFFFF;
+    --ink:#1A1A1A;
+    --ink-soft:#666666;
+    --line:#E8E8E8;
+    --stamp-red:#FF6B35;
+    --stamp-red-dark:#E55A2B;
+    --stamp-green:#FF6B35;
+    --error:#FF6B35;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    padding:40px 16px;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(35,48,61,0.06) 1px, transparent 0);
+    background-size:16px 16px;
+  }
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 6px;
+  }
+  h1{
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:32px;
+    letter-spacing:.01em;
+    text-transform:none;
+    margin:0 0 28px;
+    color:var(--ink);
+  }
+  .board{
+    display:grid;
+    grid-template-columns:300px 1fr;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:8px;
+    overflow:hidden;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  }
+  @media (max-width:720px){
+    .board{grid-template-columns:1fr;}
+    .label{border-right:none !important; border-bottom:2px dashed var(--line);}
+  }
+
+  /* --- LEFT: shipping label / order summary --- */
+  .label{
+    padding:28px 24px;
+    border-right:1px solid var(--line);
+    position:relative;
+    background:#FAFAFA;
+  }
+  .tag{
+    font-family:'Inter',sans-serif;
+    font-size:11px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 6px;
+    font-weight:500;
+  }
+  .product-name{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    line-height:1.4;
+    margin:0 0 12px;
+    color:var(--ink);
+    text-transform:none;
+  }
+  .swatch{
+    width:100%;
+    height:140px;
+    border-radius:6px;
+    background:linear-gradient(135deg,#F5F5F5,#EBEBEB);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:14px;
+    border:1px solid var(--line);
+  }
+  .price-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:8px 0;
+    border-top:1px solid var(--line);
+  }
+  .price-row + .price-row{border-top:1px solid var(--line);}
+  .price-row .k{font-size:12px;color:var(--ink-soft);}
+  .price-row .v{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink);}
+  .total-row{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding-top:12px;margin-top:8px;border-top:2px solid var(--stamp-red);
+  }
+  .total-row .k{font-family:'Inter',sans-serif;font-size:14px;font-weight:600;text-transform:none;color:var(--ink-soft);}
+  .total-row .v{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;color:var(--stamp-red);}
+  .barcode{
+    margin-top:16px;
+    height:28px;
+    background-image:repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 5px, var(--ink) 5px 6px, transparent 6px 10px);
+    opacity:.4;
+  }
+  /* --- RIGHT: form --- */
+  .formside{padding:32px 36px;}
+  .section-title{
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 16px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--line);
+    font-weight:500;
+  }
+  .grid2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  @media (max-width:480px){ .grid2{grid-template-columns:1fr;} }
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+    letter-spacing:.02em;
+  }
+  .field label .req{color:var(--stamp-red);}
+  .field input, .field textarea, .field select{
+    width:100%;
+    padding:11px 12px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    color:var(--ink);
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:6px;
+    outline:none;
+    transition:border-color .15s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus{
+    border-color:var(--stamp-red);
+  }
+  .field .err{
+    display:none;
+    font-size:12px;
+    color:var(--error);
+    margin-top:4px;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .field.invalid input, .field.invalid select{border-color:var(--error);}
+  .field.invalid .err{display:block;}
+  textarea{resize:vertical;min-height:60px;}
+
+  .pay-options{display:flex;gap:10px;margin-bottom:22px;}
+  .pay-opt{
+    flex:1;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:11px 12px;
+    cursor:pointer;
+    font-size:13.5px;
+    display:flex;align-items:center;gap:8px;
+    background:#fff;
+    transition:all .15s;
+  }
+  .pay-opt input{width:auto;margin:0;}
+  .pay-opt.checked{border-color:var(--stamp-red);background:#FFF5F0;box-shadow:inset 0 0 0 1px var(--stamp-red);}
+
+  .submit-btn{
+    width:100%;
+    padding:14px;
+    background:var(--stamp-red);
+    color:#FFFFFF;
+    border:none;
+    border-radius:6px;
+    font-family:'Inter',sans-serif;
+    font-size:16px;
+    font-weight:600;
+    letter-spacing:.02em;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:background .15s;
+  }
+  .submit-btn:hover{background:var(--stamp-red-dark);}
+  .fineprint{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    text-align:center;
+    margin-top:10px;
+  }
+
+  /* --- confirmation state --- */
+  .confirm-panel{display:none;text-align:center;padding:50px 24px;}
+  .stamp{
+    display:inline-block;
+    border:3px solid var(--stamp-red);
+    color:var(--stamp-red);
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:28px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    padding:12px 28px;
+    border-radius:6px;
+    transform:rotate(-6deg) scale(1.3);
+    opacity:0;
+    animation:stampIn .35s ease-out .1s forwards;
+  }
+  @keyframes stampIn{
+    to{transform:rotate(-6deg) scale(1);opacity:1;}
+  }
+  .order-no{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:15px;
+    color:var(--ink-soft);
+    margin-top:18px;
+  }
+  .confirm-detail{
+    text-align:left;
+    max-width:380px;
+    margin:26px auto 0;
+    background:#FAFAFA;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:16px 18px;
+    font-size:13px;
+    line-height:1.7;
+  }
+  .confirm-detail div span{color:var(--ink-soft);}
+  @media print{
+    body{background:#fff;padding:0;}
+    .formside, .board::before, .swatch{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Order 路 Step 2 of 2</p>
+  <h1>Temu gifts</h1>
+
+  <div class="board">
+    <div class="label">
+      <p class="tag">Item</p>
+      <p class="product-name" id="productName">4pcs Unisex<br>Fashionable Casual<br>Quartz</p>
+      <div class="swatch">
+        <img src="https://img.kwcdn.com/product/fancy/6a8d6481-f553-4a42-9be8-506d91afd60d.jpg?imageMogr2/auto-orient%7CimageView2/2/w/800/q/70/format/webp" alt="4pcs Watch Gift Set" style="width:100%;height:100%;object-fit:cover;border-radius:4px;" id="productImg">
+      </div>
+      <div class="price-row"><span class="k">Unit price</span><span class="v" id="unitPrice">$0.00</span></div>
+      <div class="price-row"><span class="k">Shipping</span><span class="v" id="shipPrice">$0.00</span></div>
+      <div class="total-row"><span class="k">Total</span><span class="v" id="totalPrice">$0.00</span></div>
+      <div class="barcode"></div>
+    </div>
+
+    <div class="formside">
+      <form id="orderForm" novalidate>
+        <p class="section-title">Delivery information</p>
+        <div class="grid2">
+          <div class="field" data-field="firstName">
+            <label>First name <span class="req">*</span></label>
+            <input type="text" name="firstName" placeholder="Sara">
+            <div class="err">Enter your first name.</div>
+          </div>
+          <div class="field" data-field="lastName">
+            <label>Last name <span class="req">*</span></label>
+            <input type="text" name="lastName" placeholder="Idrissi">
+            <div class="err">Enter your last name.</div>
+          </div>
+        </div>
+
+        <div class="field" data-field="address">
+          <label>Street address <span class="req">*</span></label>
+          <input type="text" name="address" placeholder="123 Avenue Mohammed V, Apt 4">
+          <div class="err">Enter your delivery address.</div>
+        </div>
+
+        <div class="grid2">
+          <div class="field" data-field="city">
+            <label>City <span class="req">*</span></label>
+            <input type="text" name="city" placeholder="Marrakesh">
+            <div class="err">Enter your city.</div>
+          </div>
+          <div class="field" data-field="postalCode">
+            <label>Postal code</label>
+            <input type="text" name="postalCode" placeholder="40000">
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field" data-field="phone">
+            <label>Phone number <span class="req">*</span></label>
+            <input type="tel" name="phone" placeholder="06 12 34 56 78">
+            <div class="err">Enter a valid phone number.</div>
+          </div>
+          <div class="field" data-field="email">
+            <label>Email (optional)</label>
+            <input type="email" name="email" placeholder="you@example.com">
+            <div class="err">Enter a valid email.</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Delivery notes (optional)</label>
+          <textarea name="notes" placeholder="Landmark, preferred delivery time, etc."></textarea>
+        </div>
+<button type="submit" class="submit-btn">Confirm order</button>
+        <p class="fineprint">You'll receive a confirmation with your order number below.</p>
+      </form>
+
+      <div class="confirm-panel" id="confirmPanel">
+        <div class="stamp">Confirmed</div>
+        <p class="order-no">Order <span id="orderNumber"></span></p>
+        <div class="confirm-detail" id="confirmDetail"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---- Customize your product here ----
+  const PRODUCT = {
+    name: "4pcs Unisex Fashionable Casual Quartz",
+    unitPrice: 0.00,
+    shipping: 0.00,
+    currency: "$"
+  };
+
+  const productName = document.getElementById('productName');
+  const unitPriceEl = document.getElementById('unitPrice');
+  const shipPriceEl = document.getElementById('shipPrice');
+  const totalPriceEl = document.getElementById('totalPrice');
+
+  productName.textContent = PRODUCT.name;
+  let qty = 1;
+
+  function money(n){ return PRODUCT.currency + n.toFixed(2); }
+
+  function renderPrices(){
+    unitPriceEl.textContent = money(PRODUCT.unitPrice * qty);
+    shipPriceEl.textContent = money(PRODUCT.shipping);
+    totalPriceEl.textContent = money(PRODUCT.unitPrice * qty + PRODUCT.shipping);
+  }
+  renderPrices();
+
+  });
+
+  const form = document.getElementById('orderForm');
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRe = /^[0-9+()\-\s]{7,}$/;
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    let valid = true;
+    const data = Object.fromEntries(new FormData(form).entries());
+
+    function setInvalid(name, isInvalid){
+      const fieldEl = form.querySelector('[data-field="'+name+'"]');
+      if(!fieldEl) return;
+      fieldEl.classList.toggle('invalid', isInvalid);
+      if(isInvalid) valid = false;
+    }
+
+    setInvalid('firstName', !data.firstName || !data.firstName.trim());
+    setInvalid('lastName', !data.lastName || !data.lastName.trim());
+    setInvalid('address', !data.address || !data.address.trim());
+    setInvalid('city', !data.city || !data.city.trim());
+    setInvalid('phone', !data.phone || !phoneRe.test(data.phone.trim()));
+    setInvalid('email', data.email && data.email.trim() && !emailRe.test(data.email.trim()));
+
+    if(!valid) return;
+
+    const orderNo = 'ORD-' + Math.floor(100000 + Math.random()*900000);
+    document.getElementById('orderNumber').textContent = orderNo;
+
+    document.getElementById('confirmDetail').innerHTML =
+      '<div><span>Name: </span>' + data.firstName + ' ' + data.lastName + '</div>' +
+      '<div><span>Address: </span>' + data.address + ', ' + data.city + (data.postalCode ? ' ' + data.postalCode : '') + '</div>' +
+      '<div><span>Phone: </span>' + data.phone + '</div>' +
+      (data.email ? '<div><span>Email: </span>' + data.email + '</div>' : '') +
+      '<div><span>Item: </span>' + PRODUCT.name + ' x' + qty + '</div>' +
+      '<div><span>Total: </span>' + money(PRODUCT.unitPrice * qty + PRODUCT.shipping) + '</div>' +
+      (data.notes ? '<div><span>Notes: </span>' + data.notes + '</div>' : '');
+
+    form.style.display = 'none';
+    document.getElementById('confirmPanel').style.display = 'block';
+  });
+</script>
+</body>
+</html>
